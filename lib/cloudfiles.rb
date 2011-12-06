@@ -49,9 +49,9 @@ module CloudFiles
     (str.respond_to?(:lines) ? str.lines : str).to_a.map { |x| x.chomp }
   end
 
-  # CGI.escape, but without special treatment on spaces
+  # Escapes characters so the API doesn't return 404s. 
   def self.escape(str,extra_exclude_chars = '')
-    str.gsub(/([^a-zA-Z0-9\_\.\-#{extra_exclude_chars}]+)/) do
+    str.gsub(/([^a-zA-Z0-9\s\_\.\-#{extra_exclude_chars}]+)/) do
       '%' + $1.unpack('H2' * $1.bytesize).join('%').upcase
     end
   end
