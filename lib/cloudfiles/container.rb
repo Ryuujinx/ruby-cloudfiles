@@ -42,7 +42,7 @@ module CloudFiles
     def container_metadata
       @metadata ||= (
         begin
-          response = SwiftClient.head_container(self.connection.storageurl, self.connection.authtoken, escaped_name)
+          response = SwiftClient.head_container(self.connection.storageurl, self.connection.authtoken, name)
           resphash = {}
           response.to_hash.select { |k,v| k.match(/^x-container-meta/) }.each { |x| resphash[x[0]] = x[1].to_s }
           {:bytes => response["x-container-bytes-used"].to_i, :count => response["x-container-object-count"].to_i, :metadata => resphash, :container_read => response["x-container-read"], :container_write => response["x-container-write"]}
@@ -226,7 +226,7 @@ module CloudFiles
         end
       end
       begin
-        response = SwiftClient.get_container(self.connection.storageurl, self.connection.authtoken, escaped_name, params[:marker], params[:limit], params[:prefix], params[:delimiter])
+        response = SwiftClient.get_container(self.connection.storageurl, self.connection.authtoken, name, params[:marker], params[:limit], params[:prefix], params[:delimiter])
         return response[1].collect{|o| o['name']}
       rescue ClientException => e
         raise CloudFiles::Exception::InvalidResponse, "Invalid response code #{e.status}" unless (e.status.to_s == "200")
@@ -289,7 +289,7 @@ module CloudFiles
     #   => false
     def object_exists?(objectname)
       begin
-        response = SwiftClient.head_object(self.connection.storageurl, self.connection.authtoken, escaped_name, objectname)
+        response = SwiftClient.head_object(self.connection.storageurl, self.connection.authtoken, name, objectname)
         true
       rescue ClientException => e
         false
@@ -318,7 +318,7 @@ module CloudFiles
     #   => NoSuchObjectException: Object nonexistent_file.txt does not exist
     def delete_object(objectname)
       begin
-        SwiftClient.delete_object(self.connection.storageurl, self.connection.authtoken, escaped_name, objectname)
+        SwiftClient.delete_object(self.connection.storageurl, self.connection.authtoken, name, objectname)
         true
       rescue ClientException => e
         raise CloudFiles::Exception::NoSuchObject, "Object #{objectname} does not exist" if (e.status.to_s == "404")

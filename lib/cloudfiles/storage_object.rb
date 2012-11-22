@@ -35,7 +35,7 @@ module CloudFiles
     def object_metadata
       @object_metadata ||= (
         begin
-          response = SwiftClient.head_object(self.container.connection.storageurl, self.container.connection.authtoken, self.container.escaped_name, escaped_name)
+          response = SwiftClient.head_object(self.container.connection.storageurl, self.container.connection.authtoken, self.container.name, name)
         rescue ClientException => e
           raise CloudFiles::Exception::NoSuchObject, "Object #{@name} does not exist" unless (e.status.to_s =~ /^20/)
         end
@@ -126,7 +126,7 @@ module CloudFiles
         headers['Range'] = range
       end
       begin
-        SwiftClient.get_object(self.container.connection.storageurl, self.container.connection.authtoken, self.container.escaped_name, escaped_name, nil, nil, &block)
+        SwiftClient.get_object(self.container.connection.storageurl, self.container.connection.authtoken, self.container.name, name, nil, nil, &block)
       end
     end
 
@@ -221,7 +221,7 @@ module CloudFiles
       # If we're taking data from standard input, send that IO object to cfreq
       data = $stdin if (data.nil? && $stdin.tty? == false)
       begin
-        response = SwiftClient.put_object(self.container.connection.storageurl, self.container.connection.authtoken, self.container.escaped_name, escaped_name, data, nil, nil, nil, nil, headers)
+        response = SwiftClient.put_object(self.container.connection.storageurl, self.container.connection.authtoken, self.container.name, name, data, nil, nil, nil, nil, headers)
       rescue ClientException => e
         code = e.status.to_s
         raise CloudFiles::Exception::InvalidResponse, "Invalid content-length header sent" if (code == "412")
